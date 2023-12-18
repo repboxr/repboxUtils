@@ -474,3 +474,12 @@ rstudio_job = function(name, expr, libs=NULL, wdir = getwd(), script.dir = tempd
 
 }
 
+writeUtf8 = function(x, file, bom=F) {
+  if (length(x)>1) {
+    x = paste0(x, collapse="\n")
+  }
+  con <- file(file, "wb")
+  if(bom) writeBin(BOM, con, endian="little")
+  writeBin(charToRaw(x), con, endian="little")
+  close(con)
+}
