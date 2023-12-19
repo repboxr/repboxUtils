@@ -483,3 +483,29 @@ writeUtf8 = function(x, file, bom=F) {
   writeBin(charToRaw(x), con, endian="little")
   close(con)
 }
+
+
+create_dirs_of_files = function (files, must.have = NULL) {
+  restore.point("create_dirs_of_files")
+  dirs = unique(dirname(files))
+  if (!is.null(must.have)) {
+    if (!all(stringi::stri_detect_fixed(files, must.have))) {
+        stop(paste0("Not all directories contain the pattern ",
+            must.have))
+    }
+
+  }
+  for (dir in dirs) {
+      if (!dir.exists(dir)) {
+          dir.create(dir, recursive = TRUE)
+      }
+  }
+}
+
+file.exists.in.any.dir = function(files, dirs) {
+  exists = rep(FALSE,length(files))
+  for (dir in dirs) {
+    exists = exits | file.exists(file.path(dir,files))
+  }
+  exists
+}
