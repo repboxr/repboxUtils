@@ -71,7 +71,7 @@ select.cols = function(x, cols, create.missing=TRUE) {
 
 
 create.missing.cols = function(x, cols, val=NA) {
-  cols = setdiff(names(x),cols)
+  cols = setdiff(cols,names(x))
   for (col in cols) {
     x[[col]] = val
   }
