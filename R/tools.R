@@ -45,6 +45,16 @@ trimws_around = function(str, around, whitespace="[\t ]*") {
   str
 }
 
+set_missing_fields = function(x, ...) {
+  new_vals = list(...)
+  cols = names(new_vals)
+  use = which(!cols %in% names(x))
+  for (i in use) {
+    x[[cols[i] ]] = new_vals[[i]]
+  }
+  x
+
+}
 
 set.fields = function(x, fields) {
   x[names(fields)] = fields
