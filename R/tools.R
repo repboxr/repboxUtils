@@ -526,17 +526,3 @@ file.exists.in.any.dir = function(files, dirs) {
   exists
 }
 
-
-#' A function that deals with failures depending on the on_fail action
-make_fail_fun = function(fail_action) {
-  if (fail_action=="error") {
-    fail_fun = function(...) stop(paste0(...),call. = FALSE)
-  } else if (fail_action=="warn") {
-    fail_fun = function(...) warning(paste0(...), call. = FALSE)
-  } else if (fail_action=="msg") {
-    fail_fun = function(...) cat(paste0("\n",...,"\n"))
-  } else {
-    fail_fun = function(...) {}
-  }
-  fail_fun
-}
