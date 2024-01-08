@@ -32,7 +32,7 @@ repbox_problem = function(msg, type, fail_action, project_dir=repbox_get_current
 
   problem_dir = file.path(project_dir,"problems")
   if (!dir.exists(problem_dir)) {
-    dir.create(problem_dir)
+    dir.create(problem_dir,recursive = TRUE)
   }
   num_files = length(list.files(problem_dir))
   prob_num = num_files +1
@@ -46,4 +46,42 @@ repbox_problem = function(msg, type, fail_action, project_dir=repbox_get_current
     cat(paste0("\n",msg,"\n"))
   }
   invisible(prob)
+}
+
+
+try_catch_repbox_problems <- function(expr,project_dir, warn_action="msg", err_action="msg") {
+  warn_li = list()
+  err <- NULL
+  value <- withCallingHandlers(
+    tryCatch(expr, error=function(e) {
+      err <<- paste0(as.character(e), collapse="\n")#captureOutput(print(e))#
+      NULL
+    }), warning=function(w) {
+      warn_li[[length(warn_li)+1]] <<- captureOutput(print(w), collapse="\n")#as.character(w)
+      invokeRestart("muffleWarning")
+    })
+
+  if (!is.null(err)) {
+    repbox_problem(err,"error", fail_action=err_action, project_dir=project_dir)
+  }
+  for (w in warn_li) {
+    repbox_problem(w,"warning", fail_action=warn_action, project_dir=project_dir)
+  }
+
+  list(value=value, warnings=warn_li, error=err)
+}
+
+
+tryCatchWarningsAndError <- function(expr) {
+  warn_li = list()
+  err <- NULL
+  value <- withCallingHandlers(
+    tryCatch(expr, error=function(e) {
+      err <<- e
+      NULL
+    }), warning=function(w) {
+      warn_li[[length(warn_li)+1]] <<- w
+      invokeRestart("muffleWarning")
+    })
+  list(value=value, warnings=warn_li, error=err)
 }
