@@ -6,6 +6,12 @@ copy.dir = function(from, to, ...) {
   invisible(all(res))
 }
 
+# removes all files in
+remove.all.files.in.dir = function(clear.dir, recursive=FALSE) {
+  if (!dir.exists(clear.dir)) return(TRUE)
+  remove.files = list.files(clear.dir,all.files = FALSE,full.names = TRUE,recursive = recursive)
+  file.remove(remove.files)
+}
 
 is_empty = function(x) {
   if (is.null(x) | all(is.na(x))) return(TRUE)
