@@ -1,5 +1,9 @@
 select = dplyr::select
 
+locals.vars.as.list = function(source = sys.frame(sys.parent(1))) {
+  as.list(source)
+}
+
 copy.dir = function(from, to, ...) {
   if (!dir.exists(to)) dir.create(to, recursive = TRUE)
   res = file.copy(list.files(from, full.names = TRUE), to, recursive = TRUE, ...)
@@ -532,3 +536,9 @@ file.exists.in.any.dir = function(files, dirs) {
   exists
 }
 
+# Get a function but set its enclosing environment
+# by default to the environment of the caller
+fun_with_env = function(fun, env=parent.frame()) {
+  environment(fun) = env
+  fun
+}
