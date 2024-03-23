@@ -1,5 +1,22 @@
 select = dplyr::select
 
+# Checks if x fits a Stat abbreviation
+# E.g. is_stata_abbr("regr","reg","regress")
+# would return TRUE
+is_stata_abbr = function(x, short, long) {
+  nlong = nchar(long)
+  nshort = nchar(short)
+  nx = nchar(x)
+
+  ok = rep(FALSE, NROW(x))
+  rows = which(nx >= nshort & nx <= nlong)
+  if (length(rows)==0) return(ok)
+
+  comp = stringi::stri_sub(long, 1, nx[rows])
+  ok[x == comp] = TRUE
+  ok
+}
+
 locals.vars.as.list = function(source = sys.frame(sys.parent(1))) {
   as.list(source)
 }
