@@ -338,15 +338,20 @@ remove.cols = function(x, cols) {
 }
 
 
-# Perform a left join but first drop columns in x
-# that also exist in y and are not part of by
-left_join_overwrite = function(x,y,by,..., yfields=NULL) {
+# Perform a left join but first drop columns in y or x
+# that also exist in x (y) and are not part of by
+left_join_overwrite = function(x,y,by,..., yfields=NULL, drop_in="y") {
   if (!is.null(yfields)) {
     y = y[,intersect(names(y),union(yfields, by)), drop=FALSE]
   }
   drop.cols = setdiff(intersect(colnames(x), colnames(y)),by)
+
   if (length(drop.cols)>0) {
-    x = x[, setdiff(colnames(x), drop.cols)]
+    if (drop_in=="y") {
+      y = y[, setdiff(colnames(y), drop.cols)]
+    } else {
+      x = x[, setdiff(colnames(x), drop.cols)]
+    }
   }
   left_join(x,y,by=by,...)
 }
