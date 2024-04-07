@@ -1,3 +1,12 @@
+repbox_set_problem_options = function(project_dir, fail_action="error") {
+  options(repbox.problem.options = list(project_dir=project_dir, fail_action=fail_action))
+}
+
+repbox_problem_opts = function(project_dir, fail_action="error") {
+  getOption("repbox.problem.options")
+}
+
+
 
 #' A function that deals with failures depending on the on_fail action
 make_fail_fun = function(fail_action) {
@@ -22,7 +31,7 @@ repbox_get_current_project_dir = function() {
 }
 
 #' A function that deals with failures depending on the on_fail action
-repbox_problem = function(msg, type, fail_action, project_dir=repbox_get_current_project_dir(), extra=list()) {
+repbox_problem = function(msg, type, fail_action=opts$fail_action, project_dir=opts$project_dir, extra=list(), opts=repbox_problem_opts()) {
   restore.point("repbox_problem")
 
   if (is.null(project_dir)) {
