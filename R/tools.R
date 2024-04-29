@@ -1,3 +1,11 @@
+atomic_class = function(val) {
+  val = as.vector(val)
+  cl = class(val)
+  if (length(cl)>1) return(cl[length(cl)])
+  cl
+}
+
+
 select = dplyr::select
 
 # Checks if x fits a Stat abbreviation
