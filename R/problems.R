@@ -1,10 +1,28 @@
-repbox_set_problem_options = function(project_dir, fail_action="error") {
-  options(repbox.problem.options = list(project_dir=project_dir, fail_action=fail_action))
+repbox_set_problem_options = function(project_dir, fail_action="error", metaid=NA_character_) {
+  options(repbox.problem.options = list(project_dir=project_dir, fail_action=fail_action, metaid=metaid))
 }
 
 repbox_problem_opts = function(project_dir, fail_action="error") {
   getOption("repbox.problem.options")
 }
+
+repbox_step_problems = function() {
+  getOption("repbox.step.problems")
+}
+
+repbox_problem_set_step = function(step=NA_integer_) {
+  options(repbox.problem.step = step)
+  if (!is.na(step)) {
+    options(repbox.step.problems = list())
+  }
+}
+
+repbox_problem_get_step = function() {
+  step = getOption("repbox.problem.step")
+  if (is.null(step)) step = NA_integer_
+  step
+}
+
 
 
 
@@ -31,21 +49,44 @@ repbox_get_current_project_dir = function() {
 }
 
 #' A function that deals with failures depending on the on_fail action
-repbox_problem = function(msg, type, fail_action=opts$fail_action, project_dir=opts$project_dir, extra=list(), opts=repbox_problem_opts()) {
+repbox_problem = function(msg, type, fail_action=opts$fail_action, project_dir=opts$project_dir,  extra=list(),metaid=opts$metaid, step=repbox_problem_get_step(), opts=repbox_problem_opts()) {
   restore.point("repbox_problem")
 
   if (is.null(project_dir)) {
     stop("project_dir not specfied")
   }
-  prob = list(type=type,msg=msg, extra=extra)
+  prob = list(type=type,msg=msg, metaid=metaid, step=step, extra=extra)
 
-  problem_dir = file.path(project_dir,"problems")
-  if (!dir.exists(problem_dir)) {
-    dir.create(problem_dir,recursive = TRUE)
+  hash = digest::digest(prob)
+
+  prob$hash = hash
+  prob$time = Sys.time()
+  if (is.na(metaid) | isTRUE(metaid %in% c("base"))) {
+    problem_dir = file.path(project_dir,"problems")
+  } else {
+    problem_dir = file.path(project_dir,"metareg", metaid, "problems")
   }
-  num_files = length(list.files(problem_dir))
-  prob_num = num_files +1
-  saveRDS(prob, paste0(problem_dir,"/problem_", prob_num,"__", type,".Rds"))
+
+  if (!dir.exists(problem_dir)) dir.create(problem_dir,recursive = TRUE)
+
+  short_hash = substr(hash, 1,8)
+  if (is.na(step)) {
+    #num_files = length(list.files(problem_dir))
+    #prob_num = num_files +1
+    saveRDS(prob, paste0(problem_dir,"/problem_", type,"__", short_hash, ".Rds"))
+  } else {
+    saveRDS(prob, paste0(problem_dir,"/step_problem_", step,"__", type,"__", short_hash, ".Rds"))
+  }
+
+  if (!is.na(step)) {
+    step_problems = getOption("repbox.step.problems")
+    if (is.null(step_problems)) {
+      step_problems = list(prob)
+    } else {
+      step_problems = c(step_problems, list(prob))
+    }
+    options(repbox.step.problems = step_problems)
+  }
 
   if (fail_action=="error") {
     stop(msg,call. = FALSE)
