@@ -61,6 +61,7 @@ repbox_problem = function(msg, type, fail_action=opts$fail_action, project_dir=o
 
   prob$hash = hash
   prob$time = Sys.time()
+  if (is.null(metaid)) metaid = NA
   if (is.na(metaid) | isTRUE(metaid %in% c("base"))) {
     problem_dir = file.path(project_dir,"problems")
   } else {
