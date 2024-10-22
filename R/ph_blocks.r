@@ -16,9 +16,13 @@ example = function() {
 
 
 
-replace.placeholders = function(str, ph.df, recursive = TRUE, rows=NULL) {
-  restore.point("ksjlfdlfjdfdfl")
+replace.placeholders = function(str, ph.df, recursive = TRUE, rows=NULL, line.temp="<§°>", adapt.ph.df=TRUE) {
+  #restore.point("replace.placeholders")
 
+  if (adapt.ph.df) {
+    ph.df = ph.df %>%
+      mutate(content = gsub("\n",line.temp, content, fixed=TRUE))
+  }
   org_str = str
   is_na = is.na(str)
 
@@ -36,13 +40,20 @@ replace.placeholders = function(str, ph.df, recursive = TRUE, rows=NULL) {
   if (recursive) {
     rows = which(stringi::stri_detect_fixed(str, ph.df$ph))
     if (length(rows)>0) {
-      restore.point("ksjlfdlfjl")
-      str = replace.placeholders(str, ph.df, recursive = TRUE, rows=rows)
+      #restore.point("replace.placeholders2")
+      str = replace.placeholders(str, ph.df, recursive = TRUE, rows=rows,adapt.ph.df = FALSE)
     }
   }
+  #restore.point("replace.placeholders3")
   if (!multiline) return(str)
 
+  if (FALSE) {
+    which(stri_detect_fixed(org_str, "\n"))
+  }
+
   str = sep.lines(str)
+  if (adapt.ph.df)
+    str = gsub(line.temp,"\n", str, fixed=TRUE)
 
   org_str[!is_na] = str
   org_str
@@ -54,7 +65,7 @@ replace.ph.keep.lines = function(str, ph.df, recursive = TRUE, rows=NULL, line.t
   temp.ph.df = ph.df %>%
     mutate(content = gsub("\n",line.temp, content, fixed=TRUE))
   str = gsub("\n",line.temp, str, fixed=TRUE)
-  str = replace.placeholders(str, temp.ph.df, recursive, rows)
+  str = replace.placeholders(str, temp.ph.df, recursive, rows, adapt.ph.df = FALSE)
   str = gsub(line.temp,"\n", str, fixed=TRUE)
   str
 }
@@ -271,5 +282,29 @@ str.blocks.pos.starting.with = function(
   pos$inner = pos$inner[rows,,drop=FALSE]
   pos$levels = pos$levels[rows]
   return(pos)
+}
+
+
+stepwise.blocks.to.placeholder = function(txt, ph.df, stop.on.error=FALSE) {
+  restore.point("stepwise.blocks.to.placeholder")
+  # Set brackets () into ph
+  txt = sep.lines(txt)
+  str = txt
+  for (i in seq_len(NROW(txt))) {
+    pho = try(blocks.to.placeholder(txt[i], start=c("("), end=c(")"), ph.prefix = "#~br"),silent = TRUE)
+    if (is(pho,"try-error")) {
+      if (stop.on.error) {
+        stop(paste0(as.character(pho),"\n. Stopped function."))
+      } else {
+        warning(paste0(as.character(pho),"\n. Keep problematic code line as it is."))
+        next
+      }
+    } else {
+      str[i] = pho$str
+      ph.df = pho$ph.df
+    }
+  }
+
+  list(str = merge.lines(str), ph.df = ph.df)
 }
 

@@ -5,6 +5,11 @@ atomic_class = function(val) {
   cl
 }
 
+to_utf8 = function(str) {
+  str = iconv(str, to="UTF-8", sub="")
+  str = enc2utf8(str)
+  str
+}
 
 select = dplyr::select
 
