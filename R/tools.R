@@ -577,3 +577,14 @@ fun_with_env = function(fun, env=parent.frame()) {
   environment(fun) = env
   fun
 }
+
+
+with_random_seed = function(expr, seed = 1234567890) {
+  old.seed = get(".Random.seed", .GlobalEnv)
+  set.seed(seed)
+  ret = eval(expr)
+  restore.point("with_random_seed")
+  assign(".Random.seed", old.seed, .GlobalEnv)
+  runif(1)
+  return(ret)
+}
