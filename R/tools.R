@@ -1,3 +1,17 @@
+example = function() {
+  make_valid_filename("dh(5/sdh.txt")
+}
+
+as_integer = function(x) {
+  suppressWarnings(as.integer(x))
+}
+
+make_valid_filename <- function(filename) {
+  # First, convert accented characters to their ASCII equivalents,
+  # then replace any character not matching [A-Za-z0-9_.-] with an underscore.
+  stri_replace_all_regex(stri_trans_general(filename, "Latin-ASCII"), "[^\\w.-]+", "_")
+}
+
 atomic_class = function(val) {
   val = as.vector(val)
   cl = class(val)

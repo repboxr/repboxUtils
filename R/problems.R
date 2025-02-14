@@ -52,6 +52,7 @@ repbox_get_current_project_dir = function() {
 repbox_problem = function(msg, type, fail_action=opts$fail_action, project_dir=opts$project_dir,  extra=list(),metaid=opts$metaid, step=repbox_problem_get_step(), opts=repbox_problem_opts()) {
   restore.point("repbox_problem")
 
+  type = make_valid_filename(type)
   if (is.null(project_dir)) {
     stop("project_dir not specfied")
   }

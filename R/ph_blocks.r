@@ -18,6 +18,10 @@ example = function() {
 
 replace.placeholders = function(str, ph.df, recursive = TRUE, rows=NULL, line.temp="<§°>", adapt.ph.df=TRUE) {
   #restore.point("replace.placeholders")
+  #cat("\nreplace.placeholders length(str)=", length(str),"\n")
+  #if (length(str)==20) {
+  #  stop()
+  #}
 
   if (adapt.ph.df) {
     ph.df = ph.df %>%
@@ -44,13 +48,13 @@ replace.placeholders = function(str, ph.df, recursive = TRUE, rows=NULL, line.te
       str = replace.placeholders(str, ph.df, recursive = TRUE, rows=rows,adapt.ph.df = FALSE)
     }
   }
-  #restore.point("replace.placeholders3")
   if (!multiline) return(str)
 
   if (FALSE) {
     which(stri_detect_fixed(org_str, "\n"))
   }
 
+  restore.point("replace.placeholders3")
   str = sep.lines(str)
   if (adapt.ph.df)
     str = gsub(line.temp,"\n", str, fixed=TRUE)
