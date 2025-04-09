@@ -2,6 +2,28 @@ example = function() {
   make_valid_filename("dh(5/sdh.txt")
 }
 
+
+copy_into_list <- function(source = parent.frame(), dest = list(), exclude = NULL) {
+  # Get all objects in the source environment
+  all_vars <- ls(envir = source, all.names = TRUE)
+
+  # Filter out variables to exclude
+  if (length(exclude)>0) {
+    vars_to_copy <- setdiff(all_vars, exclude)
+  } else {
+    vars_to_copy <- all_vars
+  }
+
+  # Vectorized assignment using mget() to get multiple objects at once
+  if (length(vars_to_copy) > 0) {
+    values <- mget(vars_to_copy, envir = source)
+    dest[names(values)] <- values
+  }
+
+  # Return the updated destination list
+  return(dest)
+}
+
 as_integer = function(x) {
   suppressWarnings(as.integer(x))
 }
@@ -132,6 +154,9 @@ create.missing.cols = function(x, cols, val=NA) {
   x
 }
 
+has_col = function(x, col) {
+  col %in% names(x)
+}
 
 has.col = function(x, col) {
   col %in% names(x)
