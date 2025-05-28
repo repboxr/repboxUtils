@@ -2,6 +2,22 @@ example = function() {
   make_valid_filename("dh(5/sdh.txt")
 }
 
+write_utf8 <- function(x, file, bom=F) {
+  x = paste0(x, collapse="\n")
+  con <- file(file, "wb")
+  if(bom) writeBin(BOM, con, endian="little")
+  writeBin(charToRaw(x), con, endian="little")
+  close(con)
+}
+
+#' Read a text file that was saved in UTF-8 format
+#' @export
+read_utf8 <- function(file,sep.lines=FALSE,warn=FALSE,...) {
+  text <- readLines(file,encoding = "UTF-8",warn=warn,...)
+  if (!sep.lines) text = paste0(text, collapse="\n")
+  text
+}
+
 
 copy_into_list <- function(source = parent.frame(), dest = list(), exclude = NULL) {
   # Get all objects in the source environment
@@ -626,4 +642,47 @@ with_random_seed = function(expr, seed = 1234567890) {
   assign(".Random.seed", old.seed, .GlobalEnv)
   runif(1)
   return(ret)
+}
+
+is_valid_zip_file <- function(path) {
+
+  ## ---- preliminaries ---------------------------------------------------
+  if (!file.exists(path)) return(FALSE)
+
+  con <- file(path, open = "rb")
+  on.exit(close(con), add = TRUE)
+
+  ## ---- 1) signature check ---------------------------------------------
+  sig <- readBin(con, what = "raw", n = 2L)
+  # legal signatures for local-file header, EOCD for empty archive, or spanned archives
+  if (!identical(sig[1],0x50)) return(FALSE)
+  if (!identical(sig[2],0x4b)) return(FALSE)
+  return(TRUE)
+
+  valid_sig <- list(
+    c(0x50, 0x4b, 0x03, 0x04),  # PK\x03\x04  -> normal archive
+    c(0x50, 0x4b, 0x05, 0x06),  # PK\x05\x06  -> empty archive
+    c(0x50, 0x4b, 0x07, 0x08)   # PK\x07\x08  -> spanned
+  )
+  if (!any(vapply(valid_sig, identical, logical(1), sig)))
+    return(FALSE)
+}
+
+is_valid_pdf_file <- function(path, quick=FALSE) {
+  con  <- file(path, "rb")
+  on.exit(close(con), add = TRUE)
+
+  # Read first 8 bytes for the header
+  header <- rawToChar(readBin(con, "raw", n = 8))
+  starts_ok <- grepl("^%PDF-[12]\\.[0-9]", header)
+  if (!starts_ok) return(FALSE)
+  if (quick) return(starts_ok)
+
+  # Read last ~10 bytes for the EOF marker
+  seek(con, where = -10, origin = "end")
+  tail   <- rawToChar(readBin(con, "raw", n = 10))
+
+  ends_ok   <- grepl("%%EOF", tail)
+
+  starts_ok && ends_ok
 }
