@@ -18,6 +18,13 @@ read_utf8 <- function(file,sep.lines=FALSE,warn=FALSE,...) {
   text
 }
 
+#' Read an RDS file if it exists. Otherwise return NULL
+#' @export
+read_rds_or_null = function (file) {
+    if (!file.exists(file))
+        return(NULL)
+    readRDS(file)
+}
 
 copy_into_list <- function(source = parent.frame(), dest = list(), exclude = NULL) {
   # Get all objects in the source environment
@@ -686,3 +693,27 @@ is_valid_pdf_file <- function(path, quick=FALSE) {
 
   starts_ok && ends_ok
 }
+
+zip_dir = function(dir, dest_file, overwrite=TRUE) {
+  if (!dir.exists(dir)) {
+    cat("\nDirectory does not exist: ", dir,"\n")
+    return(FALSE)
+  }
+  if (!overwrite & file.exists(dest_file)) {
+    cat("\nZIP file", dest_file, "already exists.\n")
+    return(FALSE)
+  }
+
+  dir = normalizePath(dir, mustWork = TRUE)
+  dest_file = normalizePath(dest_file, mustWork = FALSE)
+
+  files = list.files(dir, recursive = TRUE, all.files = TRUE, no.. = TRUE)
+
+  old_wd = getwd()
+  on.exit(setwd(old_wd), add = TRUE)
+
+  setwd(dirname(dir))
+  utils::zip(zipfile = dest_file, files = file.path(basename(dir), files))
+  return(TRUE)
+}
+
