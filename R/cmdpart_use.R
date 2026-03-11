@@ -133,9 +133,11 @@ example = function() {
 
 cmdpart_to_opts_df = function(cmdpart) {
   restore.point("cmdpart_to_opts_df")
-  opt_df = filter(cmdpart, part=="opt") %>% select(artid,step, counter, opt=content, tag=tag)
-  opt_arg = filter(cmdpart, part=="opt_arg") %>% select(artid, step, counter, opt_arg=content)
-  left_join(opt_df, opt_arg, by=c("artid","step","counter"))
+
+
+  opt_df = filter(cmdpart, part=="opt") %>% select(runid, counter, opt=content, tag=tag)
+  opt_arg = filter(cmdpart, part=="opt_arg") %>% select(runid, counter, opt_arg=content)
+  left_join(opt_df, opt_arg, by=c("runid","counter"))
 }
 
 

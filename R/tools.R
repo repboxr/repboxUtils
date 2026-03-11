@@ -2,6 +2,10 @@ example = function() {
   make_valid_filename("dh(5/sdh.txt")
 }
 
+is_empty_str = function(x) {
+  is.na(x) | is.true(x=="")
+}
+
 write_utf8 <- function(x, file, bom=F) {
   x = paste0(x, collapse="\n")
   con <- file(file, "wb")
@@ -406,6 +410,10 @@ is.true = function(x) {
 most.common = function(x) {
   uniqx <- unique(na.omit(x))
   uniqx[which.max(tabulate(match(x, uniqx)))]
+}
+
+remove_cols = function(x, cols) {
+  x[,setdiff(colnames(x),cols)]
 }
 
 remove.cols = function(x, cols) {
