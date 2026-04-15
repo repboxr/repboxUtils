@@ -1,5 +1,5 @@
-repbox_set_problem_options = function(project_dir, fail_action="error", metaid=NA_character_) {
-  options(repbox.problem.options = list(project_dir=project_dir, fail_action=fail_action, metaid=metaid))
+repbox_set_problem_options = function(project_dir=NULL, fail_action="error", metaid=NA_character_, forced_fail_action = NULL) {
+  options(repbox.problem.options = list(project_dir=project_dir, fail_action=fail_action, metaid=metaid, forced_fail_action=forced_fail_action))
 }
 
 repbox_problem_opts = function(project_dir, fail_action="error") {
@@ -51,6 +51,12 @@ repbox_get_current_project_dir = function() {
 #' A function that deals with failures depending on the on_fail action
 repbox_problem = function(msg, type, fail_action=opts$fail_action, project_dir=opts$project_dir,  extra=list(),metaid=opts$metaid, step=repbox_problem_get_step(), opts=repbox_problem_opts()) {
   restore.point("repbox_problem")
+
+
+  if (!is.null(opts$forced_fail_action)) {
+    fail_action = opts$forced_fail_action
+  }
+
 
   type = make_valid_filename(type)
   if (is.null(project_dir)) {
